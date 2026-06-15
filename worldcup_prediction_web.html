@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>世界杯预测工具</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #667085;
+      --line: #d9dee7;
+      --navy: #1d2b3a;
+      --green: #057a55;
+      --red: #c62828;
+      --amber: #a15c07;
+      --blue: #175cd3;
+      --soft-blue: #eaf2ff;
+      --soft-green: #eaf7f1;
+      --soft-amber: #fff4e5;
+      --shadow: 0 10px 26px rgba(18, 31, 53, .08);
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 270px 1fr;
+    }
+
+    aside {
+      background: var(--navy);
+      color: #fff;
+      padding: 24px 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 26px;
+      font-size: 21px;
+      font-weight: 800;
+    }
+
+    .mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: #ffffff;
+      color: var(--navy);
+      font-weight: 900;
+    }
+
+    .navbtn {
+      width: 100%;
+      border: 0;
+      color: #dbe4ef;
+      background: transparent;
+      text-align: left;
+      padding: 12px 12px;
+      border-radius: 8px;
+      margin: 4px 0;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .navbtn.active {
+      color: #fff;
+      background: rgba(255,255,255,.12);
+    }
+
+    .side-note {
+      margin-top: 28px;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 8px;
+      color: #c8d3df;
+      font-size: 13px;
+    }
+
+    main { padding: 24px; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: 0;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .seg {
+      display: inline-flex;
+      background: #e8edf3;
+      padding: 4px;
+      border-radius: 8px;
+      gap: 4px;
+    }
+
+    .seg button, .btn {
+      border: 0;
+      border-radius: 7px;
+      padding: 9px 12px;
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .seg button.active {
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(16, 24, 40, .12);
+    }
+
+    .btn {
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .btn.secondary {
+      background: #eef2f6;
+      color: var(--ink);
+    }
+
+    .btn.danger {
+      background: #fee4e2;
+      color: #b42318;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(520px, 1.3fr) minmax(360px, .7fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 15px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-title {
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .panel-body { padding: 18px; }
+
+    .match-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .match-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .match-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid #ccd3dd;
+      border-radius: 7px;
+      padding: 9px 10px;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+      min-width: 0;
+    }
+
+    .inputs {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(80px, 1fr));
+      gap: 9px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .result-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .result-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .result-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .result-name {
+      font-weight: 800;
+      font-size: 16px;
+    }
+
+    .tag {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: var(--soft-blue);
+      color: var(--blue);
+      white-space: nowrap;
+    }
+
+    .bars {
+      display: grid;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 58px 1fr 52px;
+      gap: 8px;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .track {
+      height: 8px;
+      background: #edf1f6;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      background: var(--blue);
+      border-radius: 99px;
+    }
+
+    .picks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .pick-box {
+      background: #f7f9fc;
+      border: 1px solid #e5e9f0;
+      border-radius: 7px;
+      padding: 10px;
+      min-height: 74px;
+    }
+
+    .pick-label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .pick-value {
+      font-weight: 800;
+    }
+
+    .summary {
+      display: grid;
+      gap: 12px;
+    }
+
+    .metric {
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 22px;
+      margin-top: 4px;
+    }
+
+    .settlement-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .settlement-table th, .settlement-table td {
+      padding: 11px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .settlement-table th {
+      background: var(--navy);
+      color: #fff;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+    }
+
+    .status-win { color: var(--green); font-weight: 800; }
+    .status-lose { color: var(--red); font-weight: 800; }
+    .status-half { color: var(--amber); font-weight: 800; }
+
+    .settlement-editor {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(110px, 1fr));
+      gap: 9px;
+      margin-bottom: 14px;
+      align-items: end;
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 980px) {
+      .shell { grid-template-columns: 1fr; }
+      aside {
+        height: auto;
+        position: static;
+        display: block;
+      }
+      main { padding: 14px; }
+      .grid { grid-template-columns: 1fr; }
+      .topbar { align-items: stretch; flex-direction: column; }
+      .toolbar { justify-content: flex-start; }
+      .match-top { grid-template-columns: 1fr; }
+      .inputs { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+      .settlement-editor { grid-template-columns: 1fr 1fr; }
+      .settlement-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand"><span class="mark">WC</span><span>世界杯预测</span></div>
+      <button class="navbtn active" data-tab="predict">比赛预测</button>
+      <button class="navbtn" data-tab="weights">权重说明</button>
+      <div class="side-note">
+        本地工具不保存密钥。赔率、伤停、天气、阵容等临场数据仍建议赛前刷新。
+      </div>
+    </aside>
+
+    <main>
+      <section id="predict" class="tab">
+        <div class="topbar">
+          <div>
+            <h1>比赛预测</h1>
+            <div class="hint">输入赔率和xG/xGA，选择预测模式后直接计算。</div>
+          </div>
+          <div class="toolbar">
+            <div class="seg" aria-label="预测模式">
+              <button id="strengthMode" class="active" data-mode="strength">实力优先</button>
+              <button data-mode="odds">赔率优先</button>
+            </div>
+            <button class="btn" id="runPredict">重新计算</button>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-title">输入区</div>
+              <div class="hint">输入主客队后自动匹配默认赔率和XG，数值可以自己改。</div>
+            </div>
+            <div class="panel-body">
+              <div id="matchList" class="match-list"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-title">输出区</div>
+              <div id="modeLabel" class="tag">实力优先 50/20/10/10/10</div>
+            </div>
+            <div class="panel-body">
+              <div id="results" class="result-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="settlement" class="tab hidden">
+        <div class="topbar">
+          <div>
+            <h1>投注结算</h1>
+            <div class="hint">默认只放接下来4场，可随时改赔率、结果和投入。</div>
+          </div>
+          <div class="toolbar">
+            <button class="btn secondary" id="addBet">添加结算</button>
+            <button class="btn" id="calcBet">计算收益</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">4场结算表</div>
+            <div class="hint">每场默认投注100元</div>
+          </div>
+          <div class="panel-body">
+            <div id="betEditors"></div>
+            <table class="settlement-table">
+              <thead>
+                <tr>
+                  <th>比赛</th>
+                  <th>首选投注</th>
+                  <th>结果</th>
+                  <th>赔率</th>
+                  <th>投入</th>
+                  <th>收入</th>
+                </tr>
+              </thead>
+              <tbody id="betTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid" style="margin-top:18px;">
+          <div class="metric">
+            总收入
+            <strong id="totalReturn">0</strong>
+          </div>
+          <div class="metric">
+            净盈利
+            <strong id="netProfit">0</strong>
+          </div>
+        </div>
+      </section>
+
+      <section id="weights" class="tab hidden">
+        <div class="topbar">
+          <div>
+            <h1>权重说明</h1>
+            <div class="hint">这里是当前 Web 工具里的固定计算口径。</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-body">
+            <div class="summary">
+              <div class="metric">
+                实力优先
+                <strong>XG/XGA 50% + 赔率 20% + 其他因子 30%</strong>
+                <div class="hint">其他因子包含阵容伤停/预计首发10%、近期状态/技术统计10%、天气/场地/裁判/舆情10%。</div>
+              </div>
+              <div class="metric">
+                赔率优先
+                <strong>赔率 50% + XG/XGA 20% + 其他因子 30%</strong>
+                <div class="hint">适合临场盘口更可信，或者阵容/伤停信息可能已经被市场吸收的时候。</div>
+              </div>
+              <div class="metric">
+                进球期望
+                <strong>本队xG × 对手xGA / 平均XG</strong>
+                <div class="hint">平均XG默认1.25，可在每场输入区调整。</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <template id="matchTemplate">
+    <div class="match-card">
+      <div class="match-top">
+        <label>主队 <input data-field="home" list="teamNames" /></label>
+        <label>客队 <input data-field="away" list="teamNames" /></label>
+      </div>
+      <div class="inputs">
+        <label>主胜赔率 <input data-field="oddsH" type="number" step="0.01" /></label>
+        <label>平局赔率 <input data-field="oddsD" type="number" step="0.01" /></label>
+        <label>客胜赔率 <input data-field="oddsA" type="number" step="0.01" /></label>
+        <label>平均XG <input data-field="avgXg" type="number" step="0.01" /></label>
+        <label>主队xG <input data-field="xgH" type="number" step="0.001" /></label>
+        <label>主队xGA <input data-field="xgaH" type="number" step="0.001" /></label>
+        <label>客队xG <input data-field="xgA" type="number" step="0.001" /></label>
+        <label>客队xGA <input data-field="xgaA" type="number" step="0.001" /></label>
+      </div>
+    </div>
+  </template>
+
+  <datalist id="teamNames"></datalist>
+
+  <template id="betTemplate">
+    <div class="settlement-editor">
+      <label>比赛 <input data-field="match" /></label>
+      <label>投注 <input data-field="pick" /></label>
+      <label>结果
+        <select data-field="status">
+          <option value="win">中</option>
+          <option value="lose">错</option>
+          <option value="half">中平</option>
+        </select>
+      </label>
+      <label>赔率 <input data-field="odds" type="number" step="0.01" /></label>
+      <label>投入 <input data-field="stake" type="number" step="1" value="100" /></label>
+      <button class="btn danger" data-action="removeBet">删除</button>
+    </div>
+  </template>
+
+  <script>
+    const state = {
+      mode: "strength",
+      matches: [
+        {home:"西班牙", away:"佛得角", oddsH:1.08, oddsD:12.0, oddsA:31.0, xgH:2.558, xgaH:.624, xgA:.846, xgaA:2.033, avgXg:1.25},
+        {home:"比利时", away:"埃及", oddsH:1.60, oddsD:4.00, oddsA:5.80, xgH:1.937, xgaH:.814, xgA:1.231, xgaA:1.313, avgXg:1.25},
+        {home:"沙特", away:"乌拉圭", oddsH:7.80, oddsD:4.25, oddsA:1.45, xgH:.857, xgaH:1.974, xgA:1.534, xgaA:1.162, avgXg:1.25},
+        {home:"伊朗", away:"新西兰", oddsH:1.87, oddsD:3.20, oddsA:4.85, xgH:1.146, xgaH:1.368, xgA:.914, xgaA:1.732, avgXg:1.25}
+      ],
+      bets: [
+        ["西班牙 vs 佛得角","西班牙胜","win",1.08,100],
+        ["比利时 vs 埃及","比利时胜","win",1.60,100],
+        ["沙特 vs 乌拉圭","乌拉圭胜","win",1.45,100],
+        ["伊朗 vs 新西兰","伊朗不败","win",1.87,100]
+      ]
+    };
+
+    const teamAliases = {
+      "佛得角共和国": "佛得角",
+      "卡波韦德": "佛得角",
+      "沙特阿拉伯": "沙特"
+    };
+
+    const teamDefaults = {
+      "西班牙": {xg:2.558, xga:.624},
+      "佛得角": {xg:.846, xga:2.033},
+      "比利时": {xg:1.937, xga:.814},
+      "埃及": {xg:1.231, xga:1.313},
+      "沙特": {xg:.857, xga:1.974},
+      "乌拉圭": {xg:1.534, xga:1.162},
+      "伊朗": {xg:1.146, xga:1.368},
+      "新西兰": {xg:.914, xga:1.732},
+      "法国": {xg:1.92, xga:.92},
+      "塞内加尔": {xg:1.28, xga:1.16},
+      "英格兰": {xg:1.90, xga:.86},
+      "德国": {xg:2.15, xga:.95},
+      "巴西": {xg:1.70, xga:1.18},
+      "摩洛哥": {xg:1.63, xga:.80},
+      "荷兰": {xg:1.70, xga:.87},
+      "日本": {xg:1.37, xga:1.14},
+      "瑞士": {xg:1.43, xga:1.00},
+      "卡塔尔": {xg:1.15, xga:1.25},
+      "苏格兰": {xg:1.48, xga:1.52},
+      "海地": {xg:1.29, xga:1.52},
+      "澳大利亚": {xg:.88, xga:1.27},
+      "土耳其": {xg:1.52, xga:1.35}
+    };
+
+    const fixtureDefaults = {
+      "西班牙|佛得角": {oddsH:1.08, oddsD:12.00, oddsA:31.00},
+      "比利时|埃及": {oddsH:1.60, oddsD:4.00, oddsA:5.80},
+      "沙特|乌拉圭": {oddsH:7.80, oddsD:4.25, oddsA:1.45},
+      "伊朗|新西兰": {oddsH:1.87, oddsD:3.20, oddsA:4.85},
+      "法国|塞内加尔": {oddsH:1.47, oddsD:4.49, oddsA:7.50}
+    };
+
+    const modeWeights = {
+      strength: {
+        xg: .50,
+        market: .20,
+        lineup: .10,
+        form: .10,
+        context: .10,
+        label: "实力优先 50/20/10/10/10"
+      },
+      odds: {
+        xg: .20,
+        market: .50,
+        lineup: .10,
+        form: .10,
+        context: .10,
+        label: "赔率优先 20/50/10/10/10"
+      }
+    };
+
+    const neutralProb = {H: 1 / 3, D: 1 / 3, A: 1 / 3};
+
+    function normalizeTeam(name) {
+      const clean = String(name || "").trim();
+      return teamAliases[clean] || clean;
+    }
+
+    function applyDefaults(m) {
+      const home = normalizeTeam(m.home);
+      const away = normalizeTeam(m.away);
+      m.home = home;
+      m.away = away;
+
+      if (teamDefaults[home]) {
+        m.xgH = teamDefaults[home].xg;
+        m.xgaH = teamDefaults[home].xga;
+      }
+      if (teamDefaults[away]) {
+        m.xgA = teamDefaults[away].xg;
+        m.xgaA = teamDefaults[away].xga;
+      }
+
+      const direct = fixtureDefaults[`${home}|${away}`];
+      const reverse = fixtureDefaults[`${away}|${home}`];
+      if (direct) {
+        m.oddsH = direct.oddsH;
+        m.oddsD = direct.oddsD;
+        m.oddsA = direct.oddsA;
+      } else if (reverse) {
+        m.oddsH = reverse.oddsA;
+        m.oddsD = reverse.oddsD;
+        m.oddsA = reverse.oddsH;
+      }
+      if (!m.avgXg) m.avgXg = 1.25;
+    }
+
+    const fmt = n => Number.isFinite(n) ? (Math.round(n * 10) / 10).toFixed(1) : "0.0";
+    const pct = n => `${fmt(n * 100)}%`;
+
+    function factorial(n) {
+      let v = 1;
+      for (let i = 2; i <= n; i++) v *= i;
+      return v;
+    }
+
+    function poissonProb(lambda, k) {
+      return Math.exp(-lambda) * Math.pow(lambda, k) / factorial(k);
+    }
+
+    function outcomeFromGoals(homeGoals, awayGoals, maxGoals = 10) {
+      let H = 0, D = 0, A = 0, O25 = 0;
+      const scores = [];
+      for (let h = 0; h <= maxGoals; h++) {
+        for (let a = 0; a <= maxGoals; a++) {
+          const p = poissonProb(homeGoals, h) * poissonProb(awayGoals, a);
+          if (h > a) H += p;
+          else if (h === a) D += p;
+          else A += p;
+          if (h + a > 2.5) O25 += p;
+          scores.push({score:`${h}-${a}`, p});
+        }
+      }
+      scores.sort((x, y) => y.p - x.p);
+      return {H, D, A, O25, scores: scores.slice(0, 4)};
+    }
+
+    function noVig(h, d, a) {
+      const ih = 1 / h, id = 1 / d, ia = 1 / a;
+      const sum = ih + id + ia;
+      return {H: ih / sum, D: id / sum, A: ia / sum};
+    }
+
+    function predict(m) {
+      const avg = Number(m.avgXg) || 1.25;
+      const lambdaH = (Number(m.xgH) || 0) * (Number(m.xgaA) || 0) / avg;
+      const lambdaA = (Number(m.xgA) || 0) * (Number(m.xgaH) || 0) / avg;
+      const xgProb = outcomeFromGoals(lambdaH, lambdaA);
+      const market = noVig(Number(m.oddsH), Number(m.oddsD), Number(m.oddsA));
+      const weights = modeWeights[state.mode];
+      const blend = {
+        H: xgProb.H * weights.xg + market.H * weights.market + neutralProb.H * (weights.lineup + weights.form + weights.context),
+        D: xgProb.D * weights.xg + market.D * weights.market + neutralProb.D * (weights.lineup + weights.form + weights.context),
+        A: xgProb.A * weights.xg + market.A * weights.market + neutralProb.A * (weights.lineup + weights.form + weights.context)
+      };
+      const sum = blend.H + blend.D + blend.A;
+      blend.H /= sum; blend.D /= sum; blend.A /= sum;
+      const best = Object.entries(blend).sort((a,b) => b[1] - a[1])[0][0];
+      const bestText = best === "H" ? `${m.home}胜` : best === "D" ? "平局" : `${m.away}胜`;
+      const safeText = best === "H" ? `${m.home}不败` : best === "A" ? `${m.away}不败` : "防两边胜负";
+      return {lambdaH, lambdaA, xgProb, market, blend, bestText, safeText};
+    }
+
+    function renderMatches() {
+      const list = document.getElementById("matchList");
+      list.innerHTML = "";
+      const tpl = document.getElementById("matchTemplate");
+      state.matches.forEach((m, idx) => {
+        const node = tpl.content.cloneNode(true);
+        const card = node.querySelector(".match-card");
+        card.querySelectorAll("[data-field]").forEach(input => {
+          const key = input.dataset.field;
+          input.value = m[key] ?? "";
+          input.addEventListener("input", () => {
+            state.matches[idx][key] = input.type === "number" ? Number(input.value) : input.value;
+            if (key === "home" || key === "away") {
+              applyDefaults(state.matches[idx]);
+              card.querySelectorAll("input[type='number']").forEach(numInput => {
+                const numKey = numInput.dataset.field;
+                numInput.value = state.matches[idx][numKey] ?? "";
+              });
+            }
+            renderResults();
+          });
+        });
+        list.appendChild(node);
+      });
+    }
+
+    function renderTeamOptions() {
+      const teams = document.getElementById("teamNames");
+      teams.innerHTML = Object.keys(teamDefaults)
+        .sort((a, b) => a.localeCompare(b, "zh-CN"))
+        .map(name => `<option value="${name}"></option>`)
+        .join("");
+    }
+
+    function bar(label, value) {
+      return `<div class="bar-row"><span>${label}</span><div class="track"><div class="fill" style="width:${Math.max(0, Math.min(100, value * 100))}%"></div></div><span>${pct(value)}</span></div>`;
+    }
+
+    function renderResults() {
+      const out = document.getElementById("results");
+      const modeLabel = document.getElementById("modeLabel");
+      modeLabel.textContent = modeWeights[state.mode].label;
+      out.innerHTML = state.matches.map(m => {
+        const r = predict(m);
+        return `<div class="result-card">
+          <div class="result-head">
+            <div class="result-name">${m.home} vs ${m.away}</div>
+            <span class="tag">预期 ${fmt(r.lambdaH)} - ${fmt(r.lambdaA)}</span>
+          </div>
+          <div class="bars">
+            ${bar("主胜", r.blend.H)}
+            ${bar("平局", r.blend.D)}
+            ${bar("客胜", r.blend.A)}
+          </div>
+          <div class="picks">
+            <div class="pick-box"><div class="pick-label">主推</div><div class="pick-value">${r.bestText}</div></div>
+            <div class="pick-box"><div class="pick-label">保守</div><div class="pick-value">${r.safeText}</div></div>
+            <div class="pick-box"><div class="pick-label">参考比分</div><div class="pick-value">${r.xgProb.scores.map(s => s.score).join(" / ")}</div></div>
+            <div class="pick-box"><div class="pick-label">大小球</div><div class="pick-value">${r.xgProb.O25 > .52 ? "大2.5可考虑" : "小2.5优先"}</div></div>
+          </div>
+        </div>`;
+      }).join("");
+    }
+
+    function renderBets() {
+      const editors = document.getElementById("betEditors");
+      const tpl = document.getElementById("betTemplate");
+      editors.innerHTML = "";
+      state.bets.forEach((b, idx) => {
+        const node = tpl.content.cloneNode(true);
+        const keys = ["match","pick","status","odds","stake"];
+        node.querySelectorAll("[data-field]").forEach(input => {
+          const key = input.dataset.field;
+          input.value = b[keys.indexOf(key)];
+          input.addEventListener("input", () => {
+            const pos = keys.indexOf(key);
+            b[pos] = input.type === "number" ? Number(input.value) : input.value;
+          });
+        });
+        node.querySelector("[data-action='removeBet']").addEventListener("click", () => {
+          state.bets.splice(idx, 1);
+          renderBets();
+          calcBets();
+        });
+        editors.appendChild(node);
+      });
+      calcBets();
+    }
+
+    function betReturn(b) {
+      const status = b[2], odds = Number(b[3]) || 0, stake = Number(b[4]) || 0;
+      if (status === "lose") return 0;
+      if (status === "half") return stake * 0.5 * odds;
+      return stake * odds;
+    }
+
+    function calcBets() {
+      const tbody = document.getElementById("betTable");
+      let totalStake = 0, totalReturn = 0;
+      tbody.innerHTML = state.bets.map(b => {
+        const income = betReturn(b);
+        totalReturn += income;
+        totalStake += Number(b[4]) || 0;
+        const cls = b[2] === "lose" ? "status-lose" : b[2] === "half" ? "status-half" : "status-win";
+        const statusText = b[2] === "lose" ? "错" : b[2] === "half" ? "中平" : "中";
+        return `<tr>
+          <td>${b[0]}</td>
+          <td>${b[1]}</td>
+          <td class="${cls}">${statusText}</td>
+          <td>${b[3] || "-"}</td>
+          <td>${b[4]}</td>
+          <td>${Math.round(income * 10) / 10}</td>
+        </tr>`;
+      }).join("");
+      document.getElementById("totalReturn").textContent = `${Math.round(totalReturn * 10) / 10} 元`;
+      const net = totalReturn - totalStake;
+      document.getElementById("netProfit").textContent = `${net >= 0 ? "+" : ""}${Math.round(net * 10) / 10} 元`;
+      document.getElementById("netProfit").style.color = net >= 0 ? "var(--green)" : "var(--red)";
+    }
+
+    document.querySelectorAll(".navbtn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".navbtn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        document.querySelectorAll(".tab").forEach(tab => tab.classList.add("hidden"));
+        document.getElementById(btn.dataset.tab).classList.remove("hidden");
+      });
+    });
+
+    document.querySelectorAll(".seg button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        state.mode = btn.dataset.mode;
+        document.querySelectorAll(".seg button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderResults();
+      });
+    });
+
+    document.getElementById("runPredict").addEventListener("click", renderResults);
+    document.getElementById("addBet").addEventListener("click", () => {
+      state.bets.push(["新比赛","投注项","win",2,100]);
+      renderBets();
+    });
+    document.getElementById("calcBet").addEventListener("click", calcBets);
+
+    renderTeamOptions();
+    renderMatches();
+    renderResults();
+    renderBets();
+  </script>
+</body>
+</html>
